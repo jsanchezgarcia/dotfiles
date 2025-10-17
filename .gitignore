@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Secrets and sensitive data
+**/secrets/
+**/*secret*
+**/*password*
+**/*token*
+**/api_keys/
+.zshenv.local
+*.local
+
+# Logs
+*.log
+
+# Cache files
+**/cache/
+**/.cache/

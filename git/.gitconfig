@@ -1,0 +1,200 @@
+[credential]
+	helper = osxkeychain
+[core]
+	editor = nvim
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    features = tokyo-night
+    side-by-side = true
+    navigate = true
+    dark = true
+
+[merge]
+    conflictStyle = zdiff3
+[push]
+	autoSetupRemote = true
+	default = current
+[user]
+	email = juansg.eng@gmail.com
+	name = Juan Sanchez Garcia
+[alias]
+    ### BASIC SHORTCUTS ###
+    # Single-letter shortcuts for common commands
+    a = add                    # Stage changes
+    b = branch                 # List, create, or delete branches
+    c = commit                 # Record changes to the repository
+    d = diff                   # Show changes between commits, commit and working tree, etc
+    f = fetch                  # Download objects and refs from another repository
+    g = grep                   # Print lines matching a pattern
+    l = log                    # Show commit logs
+    m = merge                  # Join two or more development histories together
+    o = checkout               # Switch branches or restore working tree files
+    p = pull                   # Fetch from and integrate with another repository or a local branch
+    r = remote                 # Manage set of tracked repositories
+    s = status                 # Show the working tree status
+    w = whatchanged            # Show logs with difference each commit introduces
+
+    ### ADD COMMANDS ###
+    # Stage all changes in the working directory
+    aa = add --all             # Stage all changes (new, modified, deleted files)
+
+    ### COMMIT COMMANDS ###
+    # Various ways to commit changes
+    ca = commit --amend        # Amend the previous commit instead of creating a new one
+    cam = commit --amend --message  # Amend previous commit with a new message
+    acane = commit -a --amend --no-edit  # Stage all changes and amend previous commit without editing message
+    cane = commit --amend --no-edit  # Amend previous commit without editing message
+    ci = commit --interactive  # Interactively choose which changes to commit
+    cm = commit --message      # Commit with a message specified on command line
+
+    ### CHECKOUT COMMANDS ###
+    co = checkout              # Alternative for checkout (same as 'o')
+    com = checkout main        # Checkout the main branch
+
+    ### CHERRY-PICK COMMANDS ###
+    # Apply changes from specific commits to current branch
+    cp = cherry-pick           # Apply changes from existing commits to current branch
+
+    ### CLEAN COMMANDS ###
+    # Commands for cleaning the working directory
+    cleanest = clean -ffdx     # Remove all untracked files and directories, including ignored ones
+    cleanout = !git clean -df && git checkout -- .  # Remove untracked files/dirs and discard all changes
+
+    ### REBASE COMMANDS ###
+    # Commands for rebasing branches
+    rbm = "!git fetch origin main:main && git rebase --no-keep-empty main"  # Rebase on top of main (pulls latest changes without switching)
+    rba = rebase --abort       # Cancel an in-progress rebase
+    rbc = rebase --continue    # Continue a rebase after resolving conflicts
+    rbi = !"f() { git rebase -i HEAD~"$1"; }; f"  # Interactive rebase of last N commits (usage: git rbi 3)
+
+    ### LOG & HISTORY COMMANDS ###
+    # Commands for viewing repository history
+    rl = reflog --format='%C(auto)%h %<|(20)%gd %C(blue)%cr%C(reset) %gs (%s)'  # Show reflog with formatted output
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit  # Pretty log with graph
+
+    ### DIFF COMMANDS ###
+    diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color  # Comprehensive diff with additional info
+
+    ### PUSH & PULL COMMANDS ###
+    # Commands for pushing and pulling changes
+    push1 = "!git push origin $(git branch-name)"  # Push current branch to origin
+    pull1 = "!git pull origin $(git branch-name)"  # Pull current branch from origin
+
+    ### RESET & UNDO COMMANDS ###
+    # Commands for undoing changes and moving backward in history
+    reset-commit = reset --soft HEAD~1             # Undo last commit, keep changes staged
+    reset-commit-hard = reset --hard HEAD~1        # Undo last commit and discard changes
+    reset-commit-clean = !git reset --hard HEAD~1 && git clean -fd  # Undo last commit and remove untracked files
+    reset-to-pristine = !git reset --hard && git clean -ffdx  # Reset to HEAD and remove all untracked files (including ignored)
+    reset-to-upstream = !git reset --hard $(git upstream-name)  # Reset to upstream branch
+
+    ### BRANCH COMMANDS ###
+    branches = "!git branch && git branch -r | sed 's/origin\\//  /g'"  # List local and remote branches in a cleaner format
+    bc = "!f() { git checkout -b $1; }; f"         # Create and checkout a new branch from current branch (usage: git bc new-branch-name)
+	bcm = "!f() { git fetch origin main && git checkout main && git merge --ff-only origin/main && git checkout -b $1 main; }; f"
+    bdm = "!git branch --merged main | grep -v '\\* main' | xargs -n 1 git branch -d"  # Delete all local branches merged into main
+    # Force delete a branch (usage: git bdf branch-name)
+    bdf = branch -D           # Force delete a branch even if it's not fully merged
+    # Delete branches that have been merged in the remote (usage: git bdr)
+    bdr = "!git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D"  # Delete local branches whose remote tracking branches are gone
+
+    ### UTILITY COMMANDS ###
+    # Maintenance and utility commands
+    prune-all = !git remote | xargs -n 1 git remote prune  # Prune stale remote-tracking branches from all remotes
+    alias = "!git config --get-regexp '^alias\\.' | cut -c 7- | sed 's/ / = /'"  # List all defined git aliases
+
+    ### WORKFLOW COMMANDS ###
+    # Complete workflows for common development tasks
+    
+    # Post-merge workflow to start a new branch with a clean state
+    # Usage: git next-branch new-feature-name
+    # This command:
+    # 1. Switches to main branch
+    # 2. Pulls latest changes from remote
+    # 3. Deletes all local branches that have been merged into main
+    # 4. Prunes stale remote-tracking branches
+    # 5. Performs a safe clean (preserves node_modules, dist, .vscode, etc.)
+    # 6. Creates and checks out a new branch from the updated main
+    # 7. Shows the status to confirm clean state
+    next-branch = "!f() { git com && git p && git bdm && git prune-all && git clean -fd && git checkout -b $1 main && git s; }; f"
+    
+    # Safer clean command that preserves important directories
+    # Removes untracked files but preserves node_modules, dist, coverage, and .vscode
+    safe-clean = "!git clean -fd --exclude=node_modules --exclude=dist --exclude=coverage --exclude=.vscode"
+	delete-all-but-main = !git branch | grep -v \"main\" | grep -v \"\\*\" | xargs git branch -D
+[pull]
+	rebase = false
+[rerere]
+	enabled = true
+
+# Tokyo Night theme colors for delta
+[delta "tokyo-night"]
+    # Use the official Tokyo Night syntax theme
+    syntax-theme = tokyonight_night
+
+    # Line numbers
+    line-numbers = true
+    line-numbers-left-format = "{nm:>4}┊"
+    line-numbers-right-format = "{np:>4}│"
+    line-numbers-left-style = "#3b4261"
+    line-numbers-right-style = "#3b4261"
+    line-numbers-minus-style = "#db4b4b"
+    line-numbers-plus-style = "#9ece6a"
+    line-numbers-zero-style = "#565f89"
+
+    # File headers - using Tokyo Night blue
+    file-style = "#7aa2f7" bold
+    file-decoration-style = "#7aa2f7" ul
+    file-added-label = [+]
+    file-copied-label = [C]
+    file-modified-label = [M]
+    file-removed-label = [-]
+    file-renamed-label = [→]
+
+    # Hunk headers - using Tokyo Night purple
+    hunk-header-style = syntax "#292e42"
+    hunk-header-decoration-style = "#bb9af7" box
+
+    # Removed lines (darker red background to match Cursor better)
+    minus-style = syntax "#2d1b1f"
+    minus-non-emph-style = syntax "#2d1b1f"
+    minus-emph-style = syntax "#6e2b2f"
+    minus-empty-line-marker-style = syntax "#3f2a2e"
+
+    # Added lines (darker blue/teal background to match Cursor better)
+    plus-style = syntax "#1a2a35"
+    plus-non-emph-style = syntax "#1a2a35"
+    plus-emph-style = syntax "#2b4f60"
+    plus-empty-line-marker-style = syntax "#233845"
+
+    # Fill lines to make backgrounds more visible with ANSI method
+    line-fill-method = ansi
+
+    # Show inline diff highlights more clearly
+    inline-hint-style = syntax
+
+    # Keep context lines with default background
+    zero-style = syntax
+
+    # Commit styling
+    commit-decoration-style = "#bb9af7" box
+    commit-style = "#bb9af7" bold
+
+    # Merge conflicts
+    merge-conflict-begin-symbol = ⌃
+    merge-conflict-end-symbol = ⌄
+    merge-conflict-ours-diff-header-style = "#f7768e" bold
+    merge-conflict-ours-diff-header-decoration-style = "#f7768e" box
+    merge-conflict-theirs-diff-header-style = "#7aa2f7" bold
+    merge-conflict-theirs-diff-header-decoration-style = "#7aa2f7" box
+
+    # Whitespace highlighting
+    whitespace-error-style = "#db4b4b" reverse
+
+    # General styling
+    blame-palette = "#1a1b26" "#24283b" "#414868"
