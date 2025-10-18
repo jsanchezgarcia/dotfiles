@@ -16,9 +16,6 @@ vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Neo-tree toggle
-vim.keymap.set('n', '<C-n>', ':Neotree filesystem toggle float<CR>')
-
 -- Window navigation is handled by smart-splits.nvim plugin
 
 -- Tab navigation
