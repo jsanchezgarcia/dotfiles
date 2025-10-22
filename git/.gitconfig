@@ -1,7 +1,7 @@
 [credential]
 	helper = osxkeychain
 [core]
-	editor = nvim
+	editor = cursor --wait
 [core]
     pager = delta
 
