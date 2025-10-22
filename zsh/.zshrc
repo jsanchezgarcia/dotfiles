@@ -19,7 +19,6 @@ source "${ZINIT_HOME}/zinit.zsh"
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
 
 # Add in snippets
 zinit snippet OMZL::git.zsh
@@ -31,10 +30,26 @@ zinit snippet OMZP::kubectl
 zinit snippet OMZP::kubectx
 zinit snippet OMZP::command-not-found
 
-# Load completions
+# Load completions BEFORE fzf-tab
 autoload -Uz compinit && compinit
 
+# Load fzf-tab AFTER compinit
+zinit light Aloxaf/fzf-tab
+
 zinit cdreplay -q
+
+# Completion styling (must be after fzf-tab load but before zoxide init)
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+
+# Initialize zoxide AFTER fzf-tab config (only in interactive shells)
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init --cmd cd zsh)"
+fi
 
 # Prompt customization
 if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
@@ -56,13 +71,6 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
-# Completion styling
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-
 # Aliases
 alias ls='ls --color'
 
@@ -70,17 +78,12 @@ alias claude="/Users/juansanchez/.claude/local/claude"
 alias ke="pkill -f 'Electron' && pkill -f 'electron'"
 
 # Shell integrations
-eval "$(fzf --zsh)"
-
-# Initialize zoxide with fallback for non-interactive shells
-if command -v zoxide &>/dev/null; then
-  eval "$(zoxide init --cmd cd zsh)"
-else
-  # Fallback: define dummy function so cd alias doesn't break
-  function __zoxide_z() {
-    builtin cd "$@"
-  }
-  alias cd='__zoxide_z'
+# Don't use fzf --zsh completion as fzf-tab handles all completion
+# Just source key bindings manually
+if [[ -f "${FZF_HOME:-$HOME/.fzf}/shell/key-bindings.zsh" ]]; then
+  source "${FZF_HOME:-$HOME/.fzf}/shell/key-bindings.zsh"
+elif [[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]]; then
+  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
 fi
 
 # Yazi shell integration
