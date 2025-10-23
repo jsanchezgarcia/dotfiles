@@ -71,11 +71,15 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
 
+# Add custom scripts to PATH
+export PATH="$HOME/scripts:$PATH"
+
 # Aliases
 alias ls='ls --color'
 
 alias claude="/Users/juansanchez/.claude/local/claude"
 alias ke="pkill -f 'Electron' && pkill -f 'electron'"
+alias wt='git-worktree-helper'
 
 # Shell integrations
 # Don't use fzf --zsh completion as fzf-tab handles all completion

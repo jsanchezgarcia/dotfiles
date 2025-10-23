@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Git worktree helper function.
+# Use it like this:
+# wt feature-name
+wt() {
+  # Exit immediately on error
+  set -e
+
+  # Get the current Git project directory (must be inside a Git repo)
+  local project_dir=$(git rev-parse --show-toplevel)
+
+  # Get the base name of the current project folder
+  local project_name=$(basename "$project_dir")
+
+  # Get the desired feature/branch name from the first argument
+  local feature_name="$1"
+
+  # Fail fast if no feature name was provided
+  if [ -z "$feature_name" ]; then
+    echo "❌ Usage: wt <feature-name>"
+    return 1
+  fi
+
+  # Define the parent folder where all worktrees go, beside the main repo
+  local worktree_parent="$(dirname "$project_dir")/${project_name}-worktrees"
+
+  # Define the full path of the new worktree folder
+  local worktree_path="${worktree_parent}/${feature_name}"
+
+  # Create the parent worktrees folder if it doesn't exist
+  mkdir -p "$worktree_parent"
+
+  # Create the worktree and the branch
+  git -C "$project_dir" worktree add -b "$feature_name" "$worktree_path"
+
+  # Copy .env if it exists
+  if [ -f "$project_dir/.env" ]; then
+    cp "$project_dir/.env" "$worktree_path/.env"
+    echo "📋 Copied .env into worktree."
+  fi
+
+  # List of hidden folders to copy if they exist
+  local hidden_dirs=(.instrumental .agent_os .claude .cursor)
+
+  for dir in "${hidden_dirs[@]}"; do
+    if [ -d "$project_dir/$dir" ]; then
+      cp -R "$project_dir/$dir" "$worktree_path/$dir"
+      echo "📋 Copied $dir into worktree."
+    fi
+  done
+
+  # Install dependencies if package.json exists
+  if [ -f "$worktree_path/package.json" ]; then
+    echo "📦 Installing dependencies..."
+    npm install --prefix "$worktree_path"
+
+    # Run better-sqlite3 setup scripts if they exist
+    npm run better-sqlite3:use-electron --prefix "$worktree_path" --if-present
+    npm run better-sqlite3:use-node --prefix "$worktree_path" --if-present
+  fi
+
+  # cd into the new worktree
+  # cd "$worktree_path"
+
+  # Open the worktree in Cursor (new window)
+  cursor -n "$worktree_path" &
+
+  # Confirm success
+  echo "✅ Worktree created at: $worktree_path"
+  echo "🚀 Opening in Cursor..."
+}
+
+# Call the function with all arguments
+wt "$@"
