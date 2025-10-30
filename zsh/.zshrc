@@ -52,8 +52,7 @@ if command -v zoxide &>/dev/null; then
 fi
 
 # Prompt customization - minimal and clean
-autoload -U colors && colors
-PROMPT='%{$fg[cyan]%}%~%{$reset_color%} %# '
+PROMPT='%F{cyan}%~%f %# '
 RPROMPT=''  # Clear right prompt set by plugins
 
 # History
