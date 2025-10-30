@@ -51,12 +51,8 @@ if command -v zoxide &>/dev/null; then
   eval "$(zoxide init --cmd cd zsh)"
 fi
 
-# Prompt customization
-if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-  eval "$(oh-my-posh init zsh)"
-else
-  eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/zen.toml)"
-fi
+# Prompt customization - minimal and clean
+PROMPT='%~ %# '
 
 # History
 HISTSIZE=5000
