@@ -53,6 +53,7 @@ fi
 
 # Prompt customization - minimal and clean
 PROMPT='%~ %# '
+RPROMPT=''  # Clear right prompt set by plugins
 
 # History
 HISTSIZE=5000
