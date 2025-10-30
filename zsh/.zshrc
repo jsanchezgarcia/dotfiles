@@ -51,10 +51,6 @@ if command -v zoxide &>/dev/null; then
   eval "$(zoxide init --cmd cd zsh)"
 fi
 
-# Prompt customization - minimal and clean
-PROMPT='%F{cyan}%~%f %# '
-RPROMPT=''  # Clear right prompt set by plugins
-
 # History
 HISTSIZE=5000
 HISTFILE=~/.zsh_history
@@ -153,3 +149,7 @@ _gco() {
   git checkout "$branch"
 }
 alias gcob='_gco'  # optional shorthand
+
+# Prompt customization - minimal and clean (must be at the end)
+PROMPT='%F{cyan}%~%f %# '
+RPROMPT=''  # Clear right prompt set by plugins
