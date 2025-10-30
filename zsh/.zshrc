@@ -151,5 +151,5 @@ _gco() {
 alias gcob='_gco'  # optional shorthand
 
 # Prompt customization - minimal and clean (must be at the end)
-PROMPT='%F{green}%~%f %# '
+PROMPT='%F{blue}%~%f %# '
 RPROMPT=''  # Clear right prompt set by plugins
