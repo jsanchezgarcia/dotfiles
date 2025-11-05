@@ -70,7 +70,6 @@ export PATH="$HOME/scripts:$PATH"
 # Aliases
 alias ls='ls --color'
 
-alias claude="/Users/juansanchez/.claude/local/claude"
 alias ke="pkill -f 'Electron' && pkill -f 'electron'"
 alias wt='git-worktree-helper'
 
@@ -150,6 +149,32 @@ _gco() {
 }
 alias gcob='_gco'  # optional shorthand
 
-# Prompt customization - minimal and clean (must be at the end)
-PROMPT='%F{blue}%~%f %# '
-RPROMPT=''  # Clear right prompt set by plugins
+# Minimal git-aware prompt
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+setopt prompt_subst
+
+# Git status indicators
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' unstagedstr ' *'
+zstyle ':vcs_info:git:*' stagedstr ' +'
+zstyle ':vcs_info:git:*' formats ' %F{blue}(%b%u%c)%f'
+zstyle ':vcs_info:git:*' actionformats ' %F{blue}(%b|%a%u%c)%f'
+
+# Function to show ahead/behind status
+git_status() {
+  local ahead behind
+  ahead=$(git rev-list --count @{upstream}..HEAD 2>/dev/null)
+  behind=$(git rev-list --count HEAD..@{upstream} 2>/dev/null)
+
+  if [[ -n $ahead && $ahead -gt 0 ]]; then
+    echo -n " %F{green}↑$ahead%f"
+  fi
+  if [[ -n $behind && $behind -gt 0 ]]; then
+    echo -n " %F{red}↓$behind%f"
+  fi
+}
+
+PROMPT='%F{cyan}%~%f${vcs_info_msg_0_}$(git_status) %# '
+RPROMPT=''
